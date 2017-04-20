@@ -29,7 +29,7 @@ def points(xmin, ymin, xmax, ymax):
                         'FROM stops '
                         'WHERE st_makebox2d(st_makepoint(:xmin, :ymin), st_makepoint(:xmax, :ymax)) ~ lat_long;',
                         xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
-    return jsonify({"data": response.as_dict()})
+    return jsonify(response.as_dict())
 
 
 @application.route("/points/id/<id>/")

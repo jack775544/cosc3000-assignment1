@@ -23,12 +23,14 @@
 
     var map, heatmap;
     var points = [];
+    var markers = [];
 
     function initMap() {
+        // {location: new google.maps.LatLng(37.782, -122.441), weight: 3}
         $.get('api/points/all', function(r){
             for (var i = 0; i < r.length; i++) {
                 var e = r[i];
-                points.push(new google.maps.LatLng(e.lat, e.long));
+                points.push({location: new google.maps.LatLng(e.lat, e.long), weight: Math.log(e.ali_count + e.brd_count)});
             }
             map = new google.maps.Map(document.getElementById('map'), {
                 zoom: 10,
@@ -40,6 +42,58 @@
                 data: points,
                 map: map
             });
+
+            var gradient = [
+                'rgba(0, 255, 255, 0)',
+                'rgba(0, 255, 255, 1)',
+                'rgba(0, 191, 255, 1)',
+                'rgba(0, 127, 255, 1)',
+                'rgba(0, 63, 255, 1)',
+                'rgba(0, 0, 255, 1)',
+                'rgba(0, 0, 223, 1)',
+                'rgba(0, 0, 191, 1)',
+                'rgba(0, 0, 159, 1)',
+                'rgba(0, 0, 127, 1)',
+                'rgba(63, 0, 91, 1)',
+                'rgba(127, 0, 63, 1)',
+                'rgba(191, 0, 31, 1)',
+                'rgba(255, 0, 0, 1)'
+            ];
+            heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
+
+            google.maps.event.addListener(map, 'zoom_changed', change);
+
+            function change(){
+                console.log(map.getZoom());
+                // Remove any placed markers
+                for (var i = 0; i < markers.length; i++) {
+                    var marker = markers[i];
+                    marker.setMap(null);
+                }
+
+                if (map.getZoom() >= 14) {
+                    // Url is:
+                    // http://localhost/points/box/-27.7/153.2/-27.8/153.5/
+                    var toprightlat = map.getBounds().getNorthEast().lat();
+                    var toprightlng = map.getBounds().getNorthEast().lng();
+                    var bottomleftlat = map.getBounds().getSouthWest().lat();
+                    var bottomleftlng = map.getBounds().getSouthWest().lng();
+                    var url = 'api/points/box/' + toprightlat + '/' + toprightlng + '/' + bottomleftlat + '/' + bottomleftlng + '/';
+                    $.get(url, function(r){
+                        console.log("GET");
+                        for (var i = 0; i < r.length; i++) {
+                            var e = r[i];
+                            console.log(e);
+                            points.push({location: new google.maps.LatLng(e.lat, e.long), weight: Math.log(e.ali_count + e.brd_count)});
+                            markers.push(new google.maps.Marker({
+                                position: google.maps.LatLng(e.lat, e.long),
+                                map: map,
+                                title: e.stop_id.toString()
+                            }));
+                        }
+                    });
+                }
+            }
         });
     }
 
@@ -63,29 +117,6 @@
 
     function changeOpacity() {
         heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
-    }
-
-    // Heatmap data: 500 Points
-    function getPoints() {
-        return [
-            new google.maps.LatLng(37.782551, -122.445368),
-            new google.maps.LatLng(37.782745, -122.444586),
-            new google.maps.LatLng(37.782842, -122.443688),
-            new google.maps.LatLng(37.782919, -122.442815),
-            new google.maps.LatLng(37.782992, -122.442112),
-            new google.maps.LatLng(37.783100, -122.441461),
-            new google.maps.LatLng(37.783206, -122.440829),
-            new google.maps.LatLng(37.783273, -122.440324),
-            new google.maps.LatLng(37.783316, -122.440023),
-            new google.maps.LatLng(37.783357, -122.439794),
-            new google.maps.LatLng(37.783371, -122.439687),
-            new google.maps.LatLng(37.783368, -122.439666),
-            new google.maps.LatLng(37.783383, -122.439594),
-            new google.maps.LatLng(37.783508, -122.439525),
-            new google.maps.LatLng(37.783842, -122.439591),
-            new google.maps.LatLng(37.784147, -122.439668),
-            new google.maps.LatLng(37.784206, -122.439686)
-        ];
     }
 </script>
 <script async defer
