@@ -62,6 +62,7 @@
             heatmap.set('gradient', heatmap.get('gradient') ? null : gradient);
 
             google.maps.event.addListener(map, 'zoom_changed', change);
+            google.maps.event.addListener(map, 'dragend', change);
 
             function change(){
                 console.log(map.getZoom());
@@ -70,31 +71,45 @@
                     var marker = markers[i];
                     marker.setMap(null);
                 }
+                markers = [];
 
                 if (map.getZoom() >= 14) {
                     // Url is:
-                    // http://localhost/points/box/-27.7/153.2/-27.8/153.5/
+                    // /api/points/box/-27.7/153.2/-27.8/153.5/
                     var toprightlat = map.getBounds().getNorthEast().lat();
                     var toprightlng = map.getBounds().getNorthEast().lng();
                     var bottomleftlat = map.getBounds().getSouthWest().lat();
                     var bottomleftlng = map.getBounds().getSouthWest().lng();
                     var url = 'api/points/box/' + toprightlat + '/' + toprightlng + '/' + bottomleftlat + '/' + bottomleftlng + '/';
                     $.get(url, function(r){
-                        console.log("GET");
                         for (var i = 0; i < r.length; i++) {
                             var e = r[i];
-                            console.log(e);
-                            points.push({location: new google.maps.LatLng(e.lat, e.long), weight: Math.log(e.ali_count + e.brd_count)});
-                            markers.push(new google.maps.Marker({
-                                position: google.maps.LatLng(e.lat, e.long),
-                                map: map,
-                                title: e.stop_id.toString()
-                            }));
+                            var m = new google.maps.Marker({
+                                icon: {
+                                    path: google.maps.SymbolPath.CIRCLE,
+                                    scale: 3
+                                },
+                                position: new google.maps.LatLng(e.lat, e.long),
+                                title: e.stop_id.toString(),
+                                map: map
+                            });
+
+                            m.stop_id = e.stop_id;
+                            m.ali_count = e.ali_count;
+                            m.brd_count = e.brd_count;
+                            google.maps.event.addListener(m, 'click', markerClick);
+                            markers.push(m);
                         }
                     });
                 }
             }
         });
+    }
+    var y;
+    function markerClick(r, t) {
+        console.log(r);
+        console.log(this);
+        y = r;
     }
 
     function toggleHeatmap() {
