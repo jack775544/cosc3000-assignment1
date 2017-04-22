@@ -1,6 +1,34 @@
-var map, heatmap;
+var map, heatmap, info;
 var points = [];
 var markers = [];
+var html =
+    "<div class='info'>" +
+    "<div>" +
+    "<div><h3 class='info-title'>Stop ID:</h3> <span>{0}</span></div>" +
+    "<div><h3 class='info-title'>Boarding Count:</h3> <span>{1}</span></div>" +
+    "<div><h3 class='info-title'>Alighting Count: </h3> <span>{2}</span></div>" +
+    "<div><h3 class='info-title'>Latitude: </h3> <span>{3}</span></div>" +
+    "<div><h3 class='info-title'>Longitude: </h3> <span>{4}</span></div>" +
+    "</div>" +
+    "<div id='chart'></div>" +
+    "</div>";
+
+/**
+ * Adds an sprintf-like method to the string object prototype
+ * For this to work, this code snippet needs to be included at the start of the javascript
+ * Code sourced from here: https://stackoverflow.com/questions/610406/javascript-equivalent-to-printf-string-format
+ */
+if (!String.prototype.format) {
+    String.prototype.format = function() {
+        var args = arguments;
+        return this.replace(/{(\d+)}/g, function(match, number) {
+            return typeof args[number] != 'undefined'
+                ? args[number]
+                : match
+                ;
+        });
+    };
+}
 
 function initMap() {
     // {location: new google.maps.LatLng(37.782, -122.441), weight: 3}
@@ -82,11 +110,31 @@ function initMap() {
         }
     });
 }
-var y;
-function markerClick(r, t) {
-    console.log(r);
-    console.log(this);
-    y = r;
+
+function markerClick(r) {
+    var mark = this;
+    if (typeof info !== 'undefined') {
+        info.close();
+    }
+    info = new google.maps.InfoWindow({
+        content: html.format(mark.stop_id, mark.brd_count, mark.ali_count, r.latLng.lat(), r.latLng.lng())
+    });
+    info.open(map, this);
+
+    var draw = function() {
+        var data = google.visualization.arrayToDataTable([
+            ['Type', 'Count'],
+            ['Boarding Count', mark.brd_count],
+            ['Alighting Count', mark.ali_count]
+        ]);
+        var options = {
+            title: 'Stop Activity'
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('chart'));
+        chart.draw(data, options);
+    };
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(draw);
 }
 
 function toggleHeatmap() {

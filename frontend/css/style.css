@@ -31,3 +31,12 @@ html, body {
     top: 10px;
     z-index: 5;
 }
+
+.info-title {
+    display: inline-block;
+}
+
+.info {
+    height: 450px;
+    width: 300px;
+}
