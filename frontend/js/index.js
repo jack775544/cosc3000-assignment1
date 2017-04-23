@@ -13,7 +13,7 @@ var html =
     "<div id='chart'></div>" +
     "</div>";
 var url_start = 'api/points/box/';
-
+document.getElementById("lightbox").style.display = "none";
 /**
  * Adds an sprintf-like method to the string object prototype
  * For this to work, this code snippet needs to be included at the start of the javascript
@@ -149,6 +149,19 @@ function toggleCluster() {
     change();
 }
 
+function toggleLightbox() {
+    if (document.getElementById("lightbox").style.display === "none") {
+        document.getElementById("lightbox").style.display = "block";
+    } else {
+        document.getElementById("lightbox").style.display = "none";
+    }
+}
+
 function toggleHeatmap() {
     heatmap.setMap(heatmap.getMap() ? null : map);
 }
+
+$("#lightbox").click(function(e) {
+    e.stopPropagation();
+    toggleLightbox();
+});

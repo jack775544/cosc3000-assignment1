@@ -25,7 +25,7 @@ html, body {
 #floating-panel {
     background-color: #fff;
     border: 1px solid #999;
-    left: 25%;
+    left: 75%;
     padding: 5px;
     position: absolute;
     top: 10px;
@@ -39,4 +39,32 @@ html, body {
 .info {
     height: 450px;
     width: 300px;
+}
+
+#lightbox {
+    font-family: 'Roboto','sans-serif';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0,0,0,0.3);
+    display: block;
+    top: 0;
+    left: 0;
+    z-index: 200;
+}
+
+#inner_box {
+    position: absolute;
+    left: 15%;
+    top: 15%;
+    height: 70%;
+    width: 70%;
+    background-color: rgb(255,255,255);
+    padding: 15px;
+}
+
+#close_lightbox {
+    top: 0;
+    left: 0;
+    position: absolute;
 }

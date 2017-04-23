@@ -11,8 +11,21 @@
     <h2 style="margin: 5px;">COSC3000 Assignment 1</h2>
     <div><span>Jack Kerr</span> | <span>43561834</span></div>
     <button onclick="toggleCluster()" id="toggle_cluster">Change to Cluster View</button>
+    <button onclick="toggleLightbox()" id="toggle_lightbox">About this visualisation</button>
 </div>
 <div id="map"></div>
+<div id="lightbox">
+    <div id="inner_box">
+        <a id="close_lightbox" onclick="toggleLightbox" href="#">[X]</a>
+        <div>
+            <h2>About this Visualisation</h2>
+            <p>This visualisation is a heatmap of all the public transport stops in the South East Queensland Region</p>
+            <p>It allows for a high level overview of the entire public transport network or to drill down on a per stop basis</p>
+            <p>To see more detailed information on a single stop, zoom the map in so markers appear on the map. Then click on the individual markers for more info</p>
+            <p>Changing to cluster view will alter markers that are displayed on the map so that the points are clustered together in logical groups using spatial data clustering</p>
+        </div>
+    </div>
+</div>
 <script type="application/javascript" src="js/jquery.min.js"></script>
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 <script type="application/javascript" src="js/index.js"></script>
