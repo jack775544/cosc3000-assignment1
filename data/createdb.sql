@@ -2,6 +2,9 @@
 CREATE DATABASE bus_data;
 \connect bus_data;
 
+CREATE USER cosc;
+ALTER USER cosc WITH PASSWORD 'password';
+
 -- Add postgis extensions
 CREATE EXTENSION postgis;
 CREATE EXTENSION postgis_topology;
@@ -28,6 +31,7 @@ CREATE TABLE public.stops (
 
 -- Index coords
 CREATE INDEX stop_coord_index ON stops USING GIST(coords);
+CREATE INDEX stop_coord_index ON stops USING GIST(lat_long);
 
 -- Insert the data into the temp table
 INSERT INTO public.my_table (c1, c2, c3, c4, c5, c6, c7) VALUES (521159.44, 6933282.5, 311401, 0, 1, -27.724632, 153.21466);
@@ -9065,3 +9069,4 @@ INSERT INTO stops (stop_id, coords, brd_count, ali_count, lat_long) (
 
 -- Drop the temp table
 DROP TABLE my_table;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO cosc;
