@@ -12,6 +12,7 @@ var html =
     "</div>" +
     "<div id='chart'></div>" +
     "</div>";
+var url_start = 'api/points/box/';
 
 /**
  * Adds an sprintf-like method to the string object prototype
@@ -68,47 +69,47 @@ function initMap() {
 
         google.maps.event.addListener(map, 'zoom_changed', change);
         google.maps.event.addListener(map, 'dragend', change);
-
-        function change(){
-            console.log(map.getZoom());
-            // Remove any placed markers
-            for (var i = 0; i < markers.length; i++) {
-                var marker = markers[i];
-                marker.setMap(null);
-            }
-            markers = [];
-
-            if (map.getZoom() >= 14) {
-                // Url is:
-                // /api/points/box/-27.7/153.2/-27.8/153.5/
-                var toprightlat = map.getBounds().getNorthEast().lat();
-                var toprightlng = map.getBounds().getNorthEast().lng();
-                var bottomleftlat = map.getBounds().getSouthWest().lat();
-                var bottomleftlng = map.getBounds().getSouthWest().lng();
-                var url = 'api/points/box/' + toprightlat + '/' + toprightlng + '/' + bottomleftlat + '/' + bottomleftlng + '/';
-                $.get(url, function(r){
-                    for (var i = 0; i < r.length; i++) {
-                        var e = r[i];
-                        var m = new google.maps.Marker({
-                            icon: {
-                                path: google.maps.SymbolPath.CIRCLE,
-                                scale: 3
-                            },
-                            position: new google.maps.LatLng(e.lat, e.long),
-                            title: e.stop_id.toString(),
-                            map: map
-                        });
-
-                        m.stop_id = e.stop_id;
-                        m.ali_count = e.ali_count;
-                        m.brd_count = e.brd_count;
-                        google.maps.event.addListener(m, 'click', markerClick);
-                        markers.push(m);
-                    }
-                });
-            }
-        }
     });
+}
+
+function change(){
+    console.log(map.getZoom());
+    // Remove any placed markers
+    for (var i = 0; i < markers.length; i++) {
+        var marker = markers[i];
+        marker.setMap(null);
+    }
+    markers = [];
+
+    if (map.getZoom() >= 14) {
+        // Url is:
+        // /api/points/box/-27.7/153.2/-27.8/153.5/
+        var toprightlat = map.getBounds().getNorthEast().lat();
+        var toprightlng = map.getBounds().getNorthEast().lng();
+        var bottomleftlat = map.getBounds().getSouthWest().lat();
+        var bottomleftlng = map.getBounds().getSouthWest().lng();
+        var url = url_start + toprightlat + '/' + toprightlng + '/' + bottomleftlat + '/' + bottomleftlng + '/';
+        $.get(url, function(r){
+            for (var i = 0; i < r.length; i++) {
+                var e = r[i];
+                var marker = new google.maps.Marker({
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 3
+                    },
+                    position: new google.maps.LatLng(e.lat, e.long),
+                    title: e.stop_id.toString(),
+                    map: map
+                });
+
+                marker.stop_id = e.stop_id;
+                marker.ali_count = e.ali_count;
+                marker.brd_count = e.brd_count;
+                google.maps.event.addListener(marker, 'click', markerClick);
+                markers.push(marker);
+            }
+        });
+    }
 }
 
 function markerClick(r) {
@@ -137,24 +138,17 @@ function markerClick(r) {
     google.charts.setOnLoadCallback(draw);
 }
 
+function toggleCluster() {
+    if (url_start === 'api/points/box/') {
+        url_start = 'api/cluster/box/';
+        document.getElementById('toggle_cluster').innerHTML = "Change to Point View";
+    } else {
+        url_start = 'api/points/box/';
+        document.getElementById('toggle_cluster').innerHTML = "Change to Cluster View";
+    }
+    change();
+}
+
 function toggleHeatmap() {
     heatmap.setMap(heatmap.getMap() ? null : map);
-}
-
-function getBounds() {
-    console.log(map.getBounds());
-    console.log(map.getBounds().getNorthEast());
-    console.log(map.getBounds().getNorthEast().lat());
-    console.log(map.getBounds().getNorthEast().lng());
-    console.log(map.getBounds().getSouthWest());
-    console.log(map.getBounds().getSouthWest().lat());
-    console.log(map.getBounds().getSouthWest().lng());
-}
-
-function changeRadius() {
-    heatmap.set('radius', heatmap.get('radius') ? null : 20);
-}
-
-function changeOpacity() {
-    heatmap.set('opacity', heatmap.get('opacity') ? null : 0.2);
 }

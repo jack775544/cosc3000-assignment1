@@ -42,6 +42,15 @@ def single_point(id):
                         id=id)
     return jsonify(response.as_dict())
 
+@application.route("/cluster/box/<xmin>/<ymin>/<xmax>/<ymax>/")
+def cluster_box(xmin, ymin, xmax, ymax):
+    db = Database(DB_URI)
+    xmin, ymin, xmax, ymax = map(float, (xmin, ymin, xmax, ymax))
+    response = db.query('SELECT clu_id stop_id, brd_cnt brd_count, ali_cnt ali_count, st_x(clu_centroid) lat, st_y(clu_centroid) long, clu_pointcnt '
+                        'FROM cluster_stops '
+                        'WHERE st_makebox2d(st_makepoint(:xmin, :ymin), st_makepoint(:xmax, :ymax)) ~ clu_centroid;',
+                        xmin=xmin, ymin=ymin, xmax=xmax, ymax=ymax)
+    return jsonify(response.as_dict())
 
 if __name__ == "__main__":
     application.run()
